@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Research Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0c10;
+      --surface: #13141a;
+      --surface2: #1c1e28;
+      --border: #2a2d3e;
+      --accent: #00e5ff;
+      --accent2: #ff4d6d;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --font-mono: 'Space Mono', monospace;
+      --font-serif: 'DM Serif Display', serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb2 {
+      position: fixed;
+      bottom: -150px;
+      left: -150px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255,77,109,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    header { margin-bottom: 56px; }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.2rem, 6vw, 3.4rem);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    h1 em { font-style: italic; color: var(--accent); }
+
+    .subtitle {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 480px;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+      margin-bottom: 40px;
+      opacity: 0.4;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .required-dot {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      background: var(--accent2);
+      border-radius: 50%;
+      margin-left: 4px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder { color: #3a3d52; }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.07);
+    }
+
+    input.error {
+      border-color: var(--accent2) !important;
+      box-shadow: 0 0 0 3px rgba(255,77,109,0.07) !important;
+    }
+
+    .error-msg {
+      font-size: 11px;
+      color: var(--accent2);
+      margin-top: 6px;
+      display: none;
+    }
+
+    .error-msg.visible { display: block; }
+
+    .section-gap { margin-top: 32px; }
+
+    .btn-wrap { margin-top: 32px; }
+
+    button[type="submit"] {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 16px;
+      cursor: pointer;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.25s;
+    }
+
+    button[type="submit"]::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      transform: translateX(-101%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      z-index: 0;
+    }
+
+    button[type="submit"]:hover::before { transform: translateX(0); }
+    button[type="submit"]:hover { color: var(--bg); }
+    button[type="submit"] span { position: relative; z-index: 1; }
+
+    button[type="submit"]:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    button[type="submit"]:disabled::before { display: none; }
+
+    .loading-wrap { display: none; margin-top: 28px; }
+    .loading-wrap.visible { display: block; }
+
+    .loading-bar-track {
+      width: 100%;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .loading-bar {
+      height: 100%;
+      width: 30%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      animation: slide 1.6s ease-in-out infinite;
+    }
+
+    @keyframes slide {
+      0%   { transform: translateX(-150%); }
+      100% { transform: translateX(450%); }
+    }
+
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: color 0.3s;
+    }
+
+    .step.active { color: var(--accent); }
+    .step.done   { color: #3a5c3a; }
+
+    .step-icon {
+      width: 16px;
+      height: 16px;
+      border: 1px solid currentColor;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+
+    .step.active .step-icon::after { content: '▶'; }
+    .step.done   .step-icon::after { content: '✓'; }
+    .step:not(.active):not(.done) .step-icon::after { content: '○'; font-size: 7px; }
+
+    .success-wrap {
+      display: none;
+      padding: 28px;
+      border: 1px solid rgba(0,229,255,0.3);
+      background: rgba(0,229,255,0.04);
+      border-radius: 2px;
+      text-align: center;
+    }
+
+    .success-wrap.visible { display: block; }
+
+    .success-icon {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 20px;
+      color: var(--accent);
+    }
+
+    .success-wrap h3 {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .success-wrap p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .reset-btn {
+      margin-top: 20px;
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+
+    .reset-btn:hover { color: var(--text); }
+
+    .footer-note {
+      margin-top: 32px;
+      font-size: 11px;
+      color: #3a3d52;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header       { animation: fadeUp 0.5s ease both; }
+    .card        { animation: fadeUp 0.5s ease 0.1s both; }
+    .footer-note { animation: fadeUp 0.5s ease 0.2s both; }
+
+    @media (max-width: 480px) {
+      .card { padding: 24px 20px; }
+      .container { padding: 40px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb2"></div>
+
+  <div class="container">
+    <header>
+      <p class="eyebrow">Automated Intelligence</p>
+      <h1>Research<br><em>Monitor</em></h1>
+      <p class="subtitle">Enter up to three research topics and your email. The system will search the web, synthesize findings, and deliver a grounded report to your inbox.</p>
+    </header>
+
+    <div class="divider"></div>
+
+    <div class="card" id="formCard">
+
+      <form id="researchForm" novalidate>
+
+        <p class="section-label">Research Topics</p>
+
+        <div class="input-group">
+          <label for="topic1">Topic 1 <span class="required-dot"></span></label>
+          <input type="text" id="topic1" placeholder="e.g. Quantum Computing" autocomplete="off" />
+          <p class="error-msg" id="topic1-error">Please enter at least one research topic.</p>
+        </div>
+
+        <div class="input-group">
+          <label for="topic2">Topic 2 <span style="color:var(--muted); font-size:10px; text-transform:none; letter-spacing:0">(optional)</span></label>
+          <input type="text" id="topic2" placeholder="e.g. AI Agents" autocomplete="off" />
+        </div>
+
+        <div class="input-group">
+          <label for="topic3">Topic 3 <span style="color:var(--muted); font-size:10px; text-transform:none; letter-spacing:0">(optional)</span></label>
+          <input type="text" id="topic3" placeholder="e.g. Edge AI" autocomplete="off" />
+        </div>
+
+        <div class="section-gap"></div>
+        <p class="section-label">Delivery</p>
+
+        <div class="input-group">
+          <label for="email">Email Address <span class="required-dot"></span></label>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+          <p class="error-msg" id="email-error">Please enter a valid email address.</p>
+        </div>
+
+        <div class="btn-wrap">
+          <button type="submit" id="submitBtn">
+            <span id="btnText">Generate Research Report →</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="loading-wrap" id="loadingWrap">
+        <div class="loading-bar-track"><div class="loading-bar"></div></div>
+        <div class="loading-steps">
+          <div class="step active" id="step1"><div class="step-icon"></div> Sending request to workflow engine</div>
+          <div class="step" id="step2"><div class="step-icon"></div> Searching the web for recent research</div>
+          <div class="step" id="step3"><div class="step-icon"></div> AI synthesizing findings from sources</div>
+          <div class="step" id="step4"><div class="step-icon"></div> Formatting and sending your report</div>
+        </div>
+      </div>
+
+      <div class="success-wrap" id="successWrap">
+        <div class="success-icon">✓</div>
+        <h3>Report Dispatched</h3>
+        <p>Your research report is being compiled and will arrive<br>in your inbox shortly.</p>
+        <button class="reset-btn" id="resetBtn">Submit another request</button>
+      </div>
+    </div>
+
+    <p class="footer-note">Powered by n8n · Web Search · LLM Summarisation<br>Sources are verified at query time — no hallucinated citations.</p>
+  </div>
+
+  <script>
+    const WEBHOOK_URL = 'https://aabhathanki.app.n8n.cloud/webhook-test/research-report';
+
+    const form        = document.getElementById('researchForm');
+    const submitBtn   = document.getElementById('submitBtn');
+    const btnText     = document.getElementById('btnText');
+    const loadingWrap = document.getElementById('loadingWrap');
+    const successWrap = document.getElementById('successWrap');
+    const resetBtn    = document.getElementById('resetBtn');
+
+    const steps = ['step1','step2','step3','step4'];
+    let stepInterval = null;
+
+    function validateEmail(v) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    function setError(inputId, show) {
+      const el  = document.getElementById(inputId);
+      const err = document.getElementById(inputId + '-error');
+      el.classList.toggle('error', show);
+      err.classList.toggle('visible', show);
+    }
+
+    function clearErrors() {
+      ['topic1', 'email'].forEach(id => setError(id, false));
+    }
+
+    function startStepAnimation() {
+      let current = 0;
+      steps.forEach(s => { document.getElementById(s).className = 'step'; });
+      document.getElementById(steps[0]).className = 'step active';
+
+      stepInterval = setInterval(() => {
+        document.getElementById(steps[current]).className = 'step done';
+        current++;
+        if (current < steps.length) {
+          document.getElementById(steps[current]).className = 'step active';
+        } else {
+          clearInterval(stepInterval);
+        }
+      }, 2200);
+    }
+
+    function showSuccess() {
+      if (stepInterval) clearInterval(stepInterval);
+      steps.forEach(s => { document.getElementById(s).className = 'step done'; });
+      setTimeout(() => {
+        loadingWrap.classList.remove('visible');
+        successWrap.classList.add('visible');
+      }, 500);
+    }
+
+    function showError(msg) {
+      if (stepInterval) clearInterval(stepInterval);
+      loadingWrap.classList.remove('visible');
+      form.style.display = '';
+      submitBtn.disabled = false;
+      btnText.textContent = 'Generate Research Report →';
+      alert('Error: ' + msg + '\n\nPlease check your n8n webhook URL and try again.');
+    }
+
+    function resetForm() {
+      successWrap.classList.remove('visible');
+      form.style.display = '';
+      form.reset();
+      clearErrors();
+      submitBtn.disabled = false;
+      btnText.textContent = 'Generate Research Report →';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const t1    = document.getElementById('topic1').value.trim();
+      const t2    = document.getElementById('topic2').value.trim();
+      const t3    = document.getElementById('topic3').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      let valid = true;
+      if (!t1)                   { setError('topic1', true); valid = false; }
+      if (!validateEmail(email)) { setError('email',  true); valid = false; }
+      if (!valid) return;
+
+      const topics  = [t1, t2, t3].filter(Boolean);
+      const payload = { email, topics };
+
+      form.style.display = 'none';
+      loadingWrap.classList.add('visible');
+      submitBtn.disabled = true;
+      startStepAnimation();
+
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showSuccess();
+      } catch (err) {
+        showError(err.message || 'Could not reach the webhook.');
+      }
+    });
+
+    resetBtn.addEventListener('click', resetForm);
+  </script>
+</body>
+</html>
